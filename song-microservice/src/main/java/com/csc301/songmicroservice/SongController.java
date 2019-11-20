@@ -42,8 +42,6 @@ public class SongController {
     response.put("path", String.format("GET %s", Utils.getUrl(request)));
 
     DbQueryStatus dbQueryStatus = songDal.findSongById(songId);
-
-    response.put("message", dbQueryStatus.getMessage());
     response =
         Utils.setResponseStatus(
             response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
@@ -82,7 +80,6 @@ public class SongController {
         new Song(params.get("songName"), params.get("songArtistFullName"), params.get("songAlbum"));
 
     DbQueryStatus dbQueryStatus = songDal.addSong(songToAdd);
-    response.put("data", dbQueryStatus.getData());
     response =
         Utils.setResponseStatus(
             response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
