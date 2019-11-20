@@ -19,9 +19,9 @@ public class SongDalImpl implements SongDal {
 
   @Override
   public DbQueryStatus addSong(Song songToAdd) {
-    Song song = db.insert(songToAdd);
+    Song addedSong = db.insert(songToAdd);
     DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
-    dbQueryStatus.setData(song.getJsonRepresentation());
+    dbQueryStatus.setData(addedSong.getJsonRepresentation());
     return dbQueryStatus;
   }
 

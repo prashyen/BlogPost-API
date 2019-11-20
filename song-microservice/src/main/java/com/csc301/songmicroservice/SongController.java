@@ -78,11 +78,10 @@ public class SongController {
     Map<String, Object> response = new HashMap<String, Object>();
     response.put("path", String.format("POST %s", Utils.getUrl(request)));
 
-    Song song =
+    Song songToAdd =
         new Song(params.get("songName"), params.get("songArtistFullName"), params.get("songAlbum"));
 
-    DbQueryStatus dbQueryStatus = songDal.addSong(song);
-
+    DbQueryStatus dbQueryStatus = songDal.addSong(songToAdd);
     response.put("data", dbQueryStatus.getData());
     response =
         Utils.setResponseStatus(
