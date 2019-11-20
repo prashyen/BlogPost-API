@@ -10,40 +10,42 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class SongDalImpl implements SongDal {
 
-	private final MongoTemplate db;
+  private final MongoTemplate db;
 
-	@Autowired
-	public SongDalImpl(MongoTemplate mongoTemplate) {
-		this.db = mongoTemplate;
-	}
+  @Autowired
+  public SongDalImpl(MongoTemplate mongoTemplate) {
+    this.db = mongoTemplate;
+  }
 
-	@Override
-	public DbQueryStatus addSong(Song songToAdd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+  @Override
+  public DbQueryStatus addSong(Song songToAdd) {
+    Song song = db.insert(songToAdd);
+    DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+    dbQueryStatus.setData(song.getJsonRepresentation());
+    return dbQueryStatus;
+  }
 
-	@Override
-	public DbQueryStatus findSongById(String songId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+  @Override
+  public DbQueryStatus findSongById(String songId) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-	@Override
-	public DbQueryStatus getSongTitleById(String songId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+  @Override
+  public DbQueryStatus getSongTitleById(String songId) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-	@Override
-	public DbQueryStatus deleteSongById(String songId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+  @Override
+  public DbQueryStatus deleteSongById(String songId) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 
-	@Override
-	public DbQueryStatus updateSongFavouritesCount(String songId, boolean shouldDecrement) {
-		// TODO Auto-generated method stub
-		return null;
-	}
+  @Override
+  public DbQueryStatus updateSongFavouritesCount(String songId, boolean shouldDecrement) {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }
