@@ -1,5 +1,6 @@
 package com.csc301.songmicroservice;
 
+import com.mongodb.client.result.DeleteResult;
 import org.bson.types.ObjectId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
@@ -33,20 +34,36 @@ public class SongDalImpl implements SongDal {
       return new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
     }
     DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
-    dbQueryStatus.setData(songById.getSongName());
+    dbQueryStatus.setData(songById.getJsonRepresentation());
     return dbQueryStatus;
   }
 
   @Override
   public DbQueryStatus getSongTitleById(String songId) {
-    // TODO Auto-generated method stub
-    return null;
+    ObjectId songObjectId = new ObjectId(songId);
+    Song songById = db.findById(songObjectId, Song.class);
+    if (songById == null) {
+      return new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+    }
+    DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+    dbQueryStatus.setData(songById.getSongName());
+    return dbQueryStatus;
   }
 
   @Override
   public DbQueryStatus deleteSongById(String songId) {
-    // TODO Auto-generated method stub
-    return null;
+    ObjectId songObjectId = new ObjectId(songId);
+    Song songById = db.findById(songObjectId, Song.class);
+    if (songById == null) {
+      return new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+    }
+    DeleteResult deletedSong = db.remove(songById);
+    if (!deletedSong.wasAcknowledged()) {
+      DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_GENERIC);
+      return dbQueryStatus;
+    }
+    DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+    return dbQueryStatus;
   }
 
   @Override

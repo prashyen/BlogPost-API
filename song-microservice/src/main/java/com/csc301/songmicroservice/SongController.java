@@ -59,17 +59,28 @@ public class SongController {
     Map<String, Object> response = new HashMap<String, Object>();
     response.put("path", String.format("GET %s", Utils.getUrl(request)));
 
-    return null;
-  }
+    DbQueryStatus dbQueryStatus = songDal.getSongTitleById(songId);
+    response =
+        Utils.setResponseStatus(
+            response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
 
+    return response;
+  }
+  /**
+   * /deleteSongById/{songId} route has a single endpoint, Delete used to remove a song given the
+   * song id
+   */
   @RequestMapping(value = "/deleteSongById/{songId}", method = RequestMethod.DELETE)
   public @ResponseBody Map<String, Object> deleteSongById(
       @PathVariable("songId") String songId, HttpServletRequest request) {
 
     Map<String, Object> response = new HashMap<String, Object>();
     response.put("path", String.format("DELETE %s", Utils.getUrl(request)));
-
-    return null;
+    DbQueryStatus dbQueryStatus = songDal.deleteSongById(songId);
+    response =
+        Utils.setResponseStatus(
+            response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
+    return response;
   }
   /**
    * /addSong route has a single endpoint, Post used to add a song given the song name, artist and
