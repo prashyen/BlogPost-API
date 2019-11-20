@@ -48,7 +48,10 @@ public class SongController {
 
     return response;
   }
-
+  /**
+   * /getSongTitleById/{songId} route has a single endpoint, GET used to retrieve a song name using
+   * the song id
+   */
   @RequestMapping(value = "/getSongTitleById/{songId}", method = RequestMethod.GET)
   public @ResponseBody Map<String, Object> getSongTitleById(
       @PathVariable("songId") String songId, HttpServletRequest request) {
@@ -68,7 +71,10 @@ public class SongController {
 
     return null;
   }
-
+  /**
+   * /addSong route has a single endpoint, Post used to add a song given the song name, artist and
+   * album
+   */
   @RequestMapping(value = "/addSong", method = RequestMethod.POST)
   public @ResponseBody Map<String, Object> addSong(
       @RequestParam Map<String, String> params, HttpServletRequest request) {
