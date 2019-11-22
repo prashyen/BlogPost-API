@@ -8,6 +8,8 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.client.RestTemplate;
 
@@ -23,9 +25,19 @@ public class SongDalImpl implements SongDal {
 
   @Override
   public DbQueryStatus addSong(Song songToAdd) {
-    Song addedSong = db.insert(songToAdd);
-    DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
-    dbQueryStatus.setData(addedSong.getJsonRepresentation());
+    DbQueryStatus dbQueryStatus = null;
+    Query query = new Query();
+    query.addCriteria(Criteria.where(Song.KEY_SONG_NAME).is(songToAdd.getSongName()));
+    query.addCriteria(Criteria.where(Song.KEY_SONG_ALBUM).is(songToAdd.getSongAlbum()));
+    query.addCriteria(
+        Criteria.where(Song.KEY_SONG_ARTIST_FULL_NAME).is(songToAdd.getSongArtistFullName()));
+    if (!db.exists(query, Song.class)) {
+      Song addedSong = db.insert(songToAdd);
+      dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+      dbQueryStatus.setData(addedSong.getJsonRepresentation());
+    }
+
+    dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
     return dbQueryStatus;
   }
 
