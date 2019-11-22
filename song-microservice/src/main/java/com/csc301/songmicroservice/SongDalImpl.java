@@ -6,7 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.client.RestTemplate;
 
 @Repository
 public class SongDalImpl implements SongDal {
@@ -62,6 +65,14 @@ public class SongDalImpl implements SongDal {
       DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_GENERIC);
       return dbQueryStatus;
     }
+
+    final String uri = "http://localhost:3002/deleteAllSongsFromDb/{songId}";
+
+    Map<String, String> params = new HashMap<String, String>();
+    params.put("songId", songId);
+    RestTemplate restTemplate = new RestTemplate();
+    restTemplate.put ( uri, "{}", params );
+
     DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
     return dbQueryStatus;
   }
