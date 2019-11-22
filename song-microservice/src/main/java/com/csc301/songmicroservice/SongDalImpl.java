@@ -70,8 +70,9 @@ public class SongDalImpl implements SongDal {
 
     Map<String, String> params = new HashMap<String, String>();
     params.put("songId", songId);
+
     RestTemplate restTemplate = new RestTemplate();
-    restTemplate.put ( uri, "{}", params );
+    restTemplate.put(uri, null, params);
 
     DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
     return dbQueryStatus;
