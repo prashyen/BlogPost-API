@@ -92,7 +92,24 @@ public class SongDalImpl implements SongDal {
 
   @Override
   public DbQueryStatus updateSongFavouritesCount(String songId, boolean shouldDecrement) {
-    // TODO Auto-generated method stub
-    return null;
+    ObjectId songObjectId = new ObjectId(songId);
+    Song songById = db.findById(songObjectId, Song.class);
+    if (songById == null) {
+      return new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+    }
+    Update update = new Update();
+    if (shouldDecrement) {
+      if (songById.getSongAmountFavourites() < 1) {
+        return new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_GENERIC);
+      }
+      update.set("songAmountFavourites", songById.getSongAmountFavourites() - 1);
+    } else {
+      update.set("songAmountFavourites", songById.getSongAmountFavourites() + 1);
+    }
+    Query query = new Query();
+    query.addCriteria(Criteria.where("_id").is(songById.getId()));
+    db.updateFirst(query, update, Song.class);
+    DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+    return dbQueryStatus;
   }
 }

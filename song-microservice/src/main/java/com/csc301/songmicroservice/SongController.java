@@ -104,6 +104,10 @@ public class SongController {
     return response;
   }
 
+  /**
+   * /updateSongFavouritesCount/{songId} route has a single endpoint, Put used to update hte
+   * favourite count of a song given the song id
+   */
   @RequestMapping(value = "/updateSongFavouritesCount/{songId}", method = RequestMethod.PUT)
   public @ResponseBody Map<String, Object> updateFavouritesCount(
       @PathVariable("songId") String songId,
@@ -111,8 +115,12 @@ public class SongController {
       HttpServletRequest request) {
 
     Map<String, Object> response = new HashMap<String, Object>();
-    response.put("data", String.format("PUT %s", Utils.getUrl(request)));
-
-    return null;
+    response.put("path", String.format("PUT %s", Utils.getUrl(request)));
+    DbQueryStatus dbQueryStatus =
+        songDal.updateSongFavouritesCount(songId, Boolean.parseBoolean(shouldDecrement));
+    response =
+        Utils.setResponseStatus(
+            response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
+    return response;
   }
 }
