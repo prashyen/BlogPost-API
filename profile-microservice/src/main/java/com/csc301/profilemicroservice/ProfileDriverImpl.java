@@ -53,24 +53,27 @@ public class ProfileDriverImpl implements ProfileDriver {
           DbQueryExecResult.QUERY_ERROR_GENERIC);
     } else {
       try (Session addProfileSession = driver.session()) {
-          // check if user with the given userName already exist
-          Map<String, Object> params = new HashMap<String, Object>();
-          params.put("userName", userName);
-          String query = "MATCH (p:profile {userName:{userName}}) return p";
-          StatementResult statementResult = addProfileSession.run(query, params);
-          if (statementResult.hasNext()) {
-            // the user with the given username already exists
-            status = new DbQueryStatus("Username already exists",
-                DbQueryExecResult.QUERY_ERROR_GENERIC);
-          } else {
-            // if there is no profile with the given username create it
+        // check if user with the given userName already exist
+        Map<String, Object> params = new HashMap<String, Object>();
+        params.put("userName", userName);
+        String query = "MATCH (p:profile {userName:{userName}}) return p";
+        StatementResult statementResult = addProfileSession.run(query, params);
+        if (statementResult.hasNext()) {
+          // the user with the given username already exists
+          status = new DbQueryStatus("Username already exists",
+              DbQueryExecResult.QUERY_ERROR_GENERIC);
+        } else {
+          // if there is no profile with the given username create it and create a favorites
+          // profile and link them together
 
-            params.put("fullName", fullName);
-            params.put("password", password);
-            query = "CREATE (:profile {userName: {userName}, fullName: {fullName}, password: {password}})";
-            statementResult = addProfileSession.run(query, params);
-            status = new DbQueryStatus("OK",
-                DbQueryExecResult.QUERY_OK);
+          params.put("fullName", fullName);
+          params.put("password", password);
+          params.put("plName", userName + "-favorites");
+          query = "CREATE (:profile {userName: {userName}, fullName: {fullName}, password:" +
+              " {password}}) -[:created]->(:playlist{plName:{plName}})";
+          statementResult = addProfileSession.run(query, params);
+          status = new DbQueryStatus("OK",
+              DbQueryExecResult.QUERY_OK);
         }
       } catch (Exception e) {
         status = new DbQueryStatus("ERROR",
