@@ -92,7 +92,33 @@ public class ProfileDriverImpl implements ProfileDriver {
   @Override
   public DbQueryStatus unfollowFriend(String userName, String frndUserName) {
 
-    return null;
+    // try unfollowing a friend
+    DbQueryStatus status = null;
+    try (Session unfollowSession = driver.session()) {
+      // check if the relationship exists if it does remove it if not send error
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("user", userName);
+      params.put("friend", frndUserName);
+      String query =
+          "MATCH (p:profile{userName:{user}})-[f:follows]->(r:profile{userName:{friend}}) return r";
+      StatementResult result = unfollowSession.run(query, params);
+      if (result.hasNext()) {
+        // if the relationship exists then delete it
+        query = "MATCH (p:profile{userName:{user}})-[f:follows]->(r:profile{userName:{friend}})" +
+            " DELETE f";
+        unfollowSession.run(query, params);
+        status = new DbQueryStatus("OK",
+            DbQueryExecResult.QUERY_OK);
+      } else {
+        status = new DbQueryStatus("Relationship does not exists",
+            DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+      }
+
+    } catch (Exception e) {
+      status = new DbQueryStatus("ERROR",
+          DbQueryExecResult.QUERY_ERROR_GENERIC);
+    }
+    return status;
   }
 
   @Override
