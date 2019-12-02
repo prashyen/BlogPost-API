@@ -93,6 +93,7 @@ public class ProfileDriverImpl implements ProfileDriver {
       StatementResult statementResult = addSongSession.run(query, params);
       if (!statementResult.hasNext()){
         query = "CREATE (:Song{songID: {songID}})";
+        statementResult = addSongSession.run(query, params);
       }
       status = new DbQueryStatus("OK",
           DbQueryExecResult.QUERY_OK);
