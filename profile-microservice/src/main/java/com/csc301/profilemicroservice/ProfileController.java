@@ -133,7 +133,7 @@ public class ProfileController {
     return response;
   }
 
-  @RequestMapping(value = "/song", method = RequestMethod.POST)
+  @RequestMapping(value = "/song", method = RequestMethod.PUT)
   @ResponseBody
   public Map<String, Object> addSongNode(@RequestParam String songId, @RequestParam String songName,
       HttpServletRequest request) {
