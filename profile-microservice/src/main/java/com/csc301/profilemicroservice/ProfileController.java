@@ -135,8 +135,9 @@ public class ProfileController {
 
   @RequestMapping(value = "/song", method = RequestMethod.POST)
   @ResponseBody
-  public Map<String, Object> addSongNode(@RequestParam String songId, HttpServletRequest request) {
-    DbQueryStatus status = profileDriver.addSong(songId);
+  public Map<String, Object> addSongNode(@RequestParam String songId, @RequestParam String songName,
+      HttpServletRequest request) {
+    DbQueryStatus status = profileDriver.addSong(songId, songName);
     Map<String, Object> response = new HashMap<String, Object>();
     response.put("path", String.format("POST %s", Utils.getUrl(request)));
     response.put("message", status.getMessage());
