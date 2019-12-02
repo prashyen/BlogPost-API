@@ -85,8 +85,45 @@ public class ProfileDriverImpl implements ProfileDriver {
 
   @Override
   public DbQueryStatus followFriend(String userName, String frndUserName) {
+    // try following a friend
+    DbQueryStatus status = null;
+    try (Session followSession = driver.session()) {
+      // check if both users exist
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("user", userName);
+      params.put("friend", frndUserName);
+      String query = "MATCH (p:profile {userName:{user}}) return p";
+      StatementResult result = followSession.run(query, params);
+      if (result.hasNext()) {
+        // if the user exists then check if the friend exists
+        query = "MATCH (p:profile {userName:{friend}}) return p";
+        result = followSession.run(query, params);
+        if (result.hasNext()) {
+          // if both exist then check if the relation already exists
+          query = "MATCH (p:profile{userName:{user}})-[f:follows]->(r:profile{userName:{friend}})" +
+              " return r";
+          result = followSession.run(query, params);
+          if (!result.hasNext()) {
+            query = "MATCH (p:profile {userName:{user}}), (r:profile {userName:{friend}})"
+                + " CREATE (p)-[:follows]->(r)";
+            followSession.run(query, params);
+          }
+          status = new DbQueryStatus("OK",
+              DbQueryExecResult.QUERY_OK);
 
-    return null;
+        } else {
+          status = new DbQueryStatus("FRIEND: " + frndUserName + " NOT FOUND",
+              DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+        }
+      } else {
+        status = new DbQueryStatus("USER: " + userName + " NOT FOUND",
+            DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+      }
+    } catch (Exception e) {
+      status = new DbQueryStatus("ERROR",
+          DbQueryExecResult.QUERY_ERROR_GENERIC);
+    }
+    return status;
   }
 
   @Override
