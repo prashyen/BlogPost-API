@@ -132,4 +132,16 @@ public class ProfileController {
             response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
     return response;
   }
+
+  @RequestMapping(value = "/song", method = RequestMethod.POST)
+  @ResponseBody
+  public Map<String, Object> addSongNode(@RequestParam String songId, HttpServletRequest request) {
+    DbQueryStatus status = profileDriver.addSong(songId);
+    Map<String, Object> response = new HashMap<String, Object>();
+    response.put("path", String.format("POST %s", Utils.getUrl(request)));
+    response.put("message", status.getMessage());
+    Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
+
+    return response;
+  }
 }
