@@ -110,10 +110,13 @@ public class ProfileController {
   Map<String, Object> likeSong(@PathVariable("userName") String userName,
       @PathVariable("songId") String songId, HttpServletRequest request) {
 
+    DbQueryStatus status = playlistDriver.likeSong(userName, songId);
     Map<String, Object> response = new HashMap<String, Object>();
-    response.put("path", String.format("PUT %s", Utils.getUrl(request)));
+    response.put("path", String.format("POST %s", Utils.getUrl(request)));
+    response.put("message", status.getMessage());
+    Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
 
-    return null;
+    return response;
   }
 
   @RequestMapping(value = "/unlikeSong/{userName}/{songId}", method = RequestMethod.PUT)
@@ -143,7 +146,8 @@ public class ProfileController {
 
   @RequestMapping(value = "/song", method = RequestMethod.POST)
   @ResponseBody
-  public Map<String, Object> addSongNode(@RequestBody AddSongRequest requestBody, HttpServletRequest request) {
+  public Map<String, Object> addSongNode(@RequestBody AddSongRequest requestBody,
+      HttpServletRequest request) {
     DbQueryStatus status = profileDriver.addSong(requestBody.getId(), requestBody.getSongName());
     Map<String, Object> response = new HashMap<String, Object>();
     response.put("path", String.format("POST %s", Utils.getUrl(request)));
