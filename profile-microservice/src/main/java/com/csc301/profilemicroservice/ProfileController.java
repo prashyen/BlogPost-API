@@ -1,9 +1,11 @@
 package com.csc301.profilemicroservice;
 
+import com.csc301.profilemicroservice.requests.AddSongRequest;
 import javax.rmi.CORBA.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,7 +18,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.Call;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 import java.io.IOException;
@@ -135,9 +136,8 @@ public class ProfileController {
 
   @RequestMapping(value = "/song", method = RequestMethod.PUT)
   @ResponseBody
-  public Map<String, Object> addSongNode(@RequestParam String songId, @RequestParam String songName,
-      HttpServletRequest request) {
-    DbQueryStatus status = profileDriver.addSong(songId, songName);
+  public Map<String, Object> addSongNode(@RequestBody AddSongRequest requestBody, HttpServletRequest request) {
+    DbQueryStatus status = profileDriver.addSong(requestBody.getId(), requestBody.getSongName());
     Map<String, Object> response = new HashMap<String, Object>();
     response.put("path", String.format("POST %s", Utils.getUrl(request)));
     response.put("message", status.getMessage());
