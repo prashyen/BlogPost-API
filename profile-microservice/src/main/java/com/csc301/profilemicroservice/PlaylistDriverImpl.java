@@ -59,7 +59,7 @@ public class PlaylistDriverImpl implements PlaylistDriver {
               DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
         }
       } else {
-        status = new DbQueryStatus("OK",
+        status = new DbQueryStatus("User not found",
             DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
       }
     } catch (Exception e) {
