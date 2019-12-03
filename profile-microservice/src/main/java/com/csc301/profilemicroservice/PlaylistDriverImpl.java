@@ -65,7 +65,6 @@ public class PlaylistDriverImpl implements PlaylistDriver {
     } catch (Exception e) {
       status = new DbQueryStatus("ERROR",
           DbQueryExecResult.QUERY_ERROR_GENERIC);
-      System.out.println(e);
     }
     return status;
   }
