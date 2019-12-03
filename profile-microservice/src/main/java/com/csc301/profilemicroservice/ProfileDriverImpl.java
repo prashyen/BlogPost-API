@@ -83,6 +83,27 @@ public class ProfileDriverImpl implements ProfileDriver {
     return status;
   }
 
+  public DbQueryStatus addSong(String songId, String songName){
+    // try adding a song node
+    DbQueryStatus status = null;
+    try (Session addSongSession = driver.session()){
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("songID", songId);
+      params.put("songName", songName);
+      String query = "MATCH (r:Song{songID: {songID}}) return r";
+      StatementResult statementResult = addSongSession.run(query, params);
+      if (!statementResult.hasNext()){
+        query = "CREATE (:Song{songID: {songID}, songName:{songName}})";
+        statementResult = addSongSession.run(query, params);
+      }
+      status = new DbQueryStatus("OK",
+          DbQueryExecResult.QUERY_OK);
+    } catch(Exception e){
+      status = new DbQueryStatus("ERROR",
+          DbQueryExecResult.QUERY_ERROR_GENERIC);
+    }
+    return status;
+  }
   @Override
   public DbQueryStatus followFriend(String userName, String frndUserName) {
 
