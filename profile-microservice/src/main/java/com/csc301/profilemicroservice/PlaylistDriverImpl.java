@@ -32,8 +32,32 @@ public class PlaylistDriverImpl implements PlaylistDriver {
 
   @Override
   public DbQueryStatus unlikeSong(String userName, String songId) {
+    DbQueryStatus status = null;
+    // try unliking a song
+    try (Session unlikeSession = driver.session()) {
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("favorite", userName + "-favorites");
+      params.put("songId", songId);
+      String query = "MATCH (p:playlist{plName: {favorite}})-[:includes]->(:Song{songID:{songId}}) return p";
+      StatementResult result = unlikeSession.run(query, params);
+      if (result.hasNext()) {
+        // if the relationship exists delete it
+        query = "MATCH (:playlist{plName: {favorite}})-[i:includes]->(:Song{songID:{songId}}) DELETE i";
+        unlikeSession.run(query, params);
+        status = new DbQueryStatus("OK",
+            DbQueryExecResult.QUERY_OK);
+      } else {
+        // if the relationship wasn't found output and error
+        status = new DbQueryStatus(
+            "User: " + userName + " does not like the song with the id: " + songId,
+            DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+      }
+    } catch (Exception e) {
 
-    return null;
+      status = new DbQueryStatus("ERROR",
+          DbQueryExecResult.QUERY_ERROR_GENERIC);
+    }
+    return status;
   }
 
   @Override
