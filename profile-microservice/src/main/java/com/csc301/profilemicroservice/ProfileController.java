@@ -121,10 +121,13 @@ public class ProfileController {
   Map<String, Object> unlikeSong(@PathVariable("userName") String userName,
       @PathVariable("songId") String songId, HttpServletRequest request) {
 
+    DbQueryStatus status = playlistDriver.unlikeSong(userName, songId);
     Map<String, Object> response = new HashMap<String, Object>();
-    response.put("path", String.format("PUT %s", Utils.getUrl(request)));
+    response.put("path", String.format("POST %s", Utils.getUrl(request)));
+    response.put("message", status.getMessage());
+    Utils.setResponseStatus(response, status.getdbQueryExecResult(), status.getData());
 
-    return null;
+    return response;
   }
 
   @RequestMapping(value = "/deleteAllSongsFromDb/{songId}", method = RequestMethod.PUT)
