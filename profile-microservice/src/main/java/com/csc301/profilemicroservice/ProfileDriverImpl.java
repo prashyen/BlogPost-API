@@ -5,11 +5,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import java.util.Set;
+import org.json.JSONObject;
 import org.neo4j.driver.v1.Driver;
 import org.neo4j.driver.v1.Record;
 import org.neo4j.driver.v1.Session;
 import org.neo4j.driver.v1.StatementResult;
 
+import org.neo4j.driver.v1.Value;
 import org.springframework.stereotype.Repository;
 import org.neo4j.driver.v1.Transaction;
 
@@ -83,27 +86,28 @@ public class ProfileDriverImpl implements ProfileDriver {
     return status;
   }
 
-  public DbQueryStatus addSong(String songId, String songName){
+  public DbQueryStatus addSong(String songId, String songName) {
     // try adding a song node
     DbQueryStatus status = null;
-    try (Session addSongSession = driver.session()){
+    try (Session addSongSession = driver.session()) {
       Map<String, Object> params = new HashMap<String, Object>();
       params.put("songID", songId);
       params.put("songName", songName);
       String query = "MATCH (r:Song{songID: {songID}}) return r";
       StatementResult statementResult = addSongSession.run(query, params);
-      if (!statementResult.hasNext()){
+      if (!statementResult.hasNext()) {
         query = "CREATE (:Song{songID: {songID}, songName:{songName}})";
         statementResult = addSongSession.run(query, params);
       }
       status = new DbQueryStatus("OK",
           DbQueryExecResult.QUERY_OK);
-    } catch(Exception e){
+    } catch (Exception e) {
       status = new DbQueryStatus("ERROR",
           DbQueryExecResult.QUERY_ERROR_GENERIC);
     }
     return status;
   }
+
   @Override
   public DbQueryStatus followFriend(String userName, String frndUserName) {
     // try following a friend
@@ -181,7 +185,47 @@ public class ProfileDriverImpl implements ProfileDriver {
 
   @Override
   public DbQueryStatus getAllSongFriendsLike(String userName) {
+    DbQueryStatus status = null;
+    Record friendSong;
+    Map<String, List<String>> data = new HashMap<String, List<String>>();
+    // try getting friends liked songs
+    try (Session friendLikesSession = driver.session()) {
+      Map<String, Object> params = new HashMap<String, Object>();
+      params.put("userName", userName);
+      // first check if the user exists
+      String query = "MATCH (p:profile{userName:{userName}}) return p";
+      StatementResult result = friendLikesSession.run(query, params);
+      if (result.hasNext()) {
+        query = "MATCH (:profile{userName:{userName}})-[:follows]->(p:profile)-[:created]->(:playlist)-[:includes]->(s:Song) return p,s";
+        result = friendLikesSession.run(query, params);
+        Value profile;
+        Value song;
+        Object profileName;
+        while (result.hasNext()) {
+          friendSong = result.next();
+          profile = friendSong.get("p");
+          song = friendSong.get("s");
+          profileName = profile.asMap().get("userName");
+          if (!data.containsKey(profileName)) {
+            // if the profile songs map doesn't contain the name then add it
+            data.put(profileName.toString(), new ArrayList<String>());
+          }
+          data.get(profileName).add(song.asMap().get("songName").toString());
+        }
+        status = new DbQueryStatus("OK",
+            DbQueryExecResult.QUERY_OK);
+        status.setData(data);
+      }else{
+        status = new DbQueryStatus("USER NOT FOUND",
+            DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+      }
+    } catch (Exception e) {
+      status = new DbQueryStatus("ERROR",
+          DbQueryExecResult.QUERY_ERROR_GENERIC);
+    }
 
-    return null;
+    return status;
   }
+
+
 }
