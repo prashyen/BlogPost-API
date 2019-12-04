@@ -37,18 +37,18 @@ public class PlaylistDriverImpl implements PlaylistDriver {
       StatementResult result = likeSongSession.run(query, params);
       if (result.hasNext()) {
         // if the user exists check if the song exists
-        query = "MATCH (s:Song {songID:{songId}}) return s";
+        query = "MATCH (s:song {songId:{songId}}) return s";
         result = likeSongSession.run(query, params);
         if (result.hasNext()) {
           // if the song exists create a relation between the song and the users favorites
           params.put("favorites", userName + "-favorites");
           // check if the relation already exists
-          query = "MATCH (p:playlist{plName:{favorites}})-[:includes]->(s:Song{songID:{songId}})"
+          query = "MATCH (p:playlist{plName:{favorites}})-[:includes]->(s:song{songId:{songId}})"
               + "return p,s";
           result = likeSongSession.run(query, params);
           if (!result.hasNext()) {
             // if the realtion doesn't exist create it
-            query = "MATCH(p:playlist{plName:{favorites}}), (s:Song{songID:{songId}}) CREATE "
+            query = "MATCH(p:playlist{plName:{favorites}}), (s:song{songId:{songId}}) CREATE "
                 + "(p)-[:includes]->(s)";
             likeSongSession.run(query, params);
           }
@@ -77,11 +77,11 @@ public class PlaylistDriverImpl implements PlaylistDriver {
       Map<String, Object> params = new HashMap<String, Object>();
       params.put("favorite", userName + "-favorites");
       params.put("songId", songId);
-      String query = "MATCH (p:playlist{plName: {favorite}})-[:includes]->(:Song{songID:{songId}}) return p";
+      String query = "MATCH (p:playlist{plName: {favorite}})-[:includes]->(:song{songId:{songId}}) return p";
       StatementResult result = unlikeSession.run(query, params);
       if (result.hasNext()) {
         // if the relationship exists delete it
-        query = "MATCH (:playlist{plName: {favorite}})-[i:includes]->(:Song{songID:{songId}}) DELETE i";
+        query = "MATCH (:playlist{plName: {favorite}})-[i:includes]->(:song{songId:{songId}}) DELETE i";
         unlikeSession.run(query, params);
         status = new DbQueryStatus("OK",
             DbQueryExecResult.QUERY_OK);

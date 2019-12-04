@@ -93,10 +93,10 @@ public class ProfileDriverImpl implements ProfileDriver {
       Map<String, Object> params = new HashMap<String, Object>();
       params.put("songID", songId);
       params.put("songName", songName);
-      String query = "MATCH (r:Song{songID: {songID}}) return r";
+      String query = "MATCH (r:song{songId: {songID}}) return r";
       StatementResult statementResult = addSongSession.run(query, params);
       if (!statementResult.hasNext()) {
-        query = "CREATE (:Song{songID: {songID}, songName:{songName}})";
+        query = "CREATE (:song{songId: {songID}, songName:{songName}})";
         statementResult = addSongSession.run(query, params);
       }
       status = new DbQueryStatus("OK",
@@ -196,7 +196,7 @@ public class ProfileDriverImpl implements ProfileDriver {
       String query = "MATCH (p:profile{userName:{userName}}) return p";
       StatementResult result = friendLikesSession.run(query, params);
       if (result.hasNext()) {
-        query = "MATCH (:profile{userName:{userName}})-[:follows]->(p:profile)-[:created]->(:playlist)-[:includes]->(s:Song) return p,s";
+        query = "MATCH (:profile{userName:{userName}})-[:follows]->(p:profile)-[:created]->(:playlist)-[:includes]->(s:song) return p,s";
         result = friendLikesSession.run(query, params);
         Value profile;
         Value song;
