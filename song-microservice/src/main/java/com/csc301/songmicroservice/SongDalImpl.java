@@ -32,114 +32,142 @@ public class SongDalImpl implements SongDal {
 
   @Override
   public DbQueryStatus addSong(Song songToAdd) {
-    DbQueryStatus dbQueryStatus = null;
-    Song addedSong = null;
-    Query query = new Query();
-    query.addCriteria(Criteria.where(Song.KEY_SONG_NAME).is(songToAdd.getSongName()));
-    query.addCriteria(Criteria.where(Song.KEY_SONG_ALBUM).is(songToAdd.getSongAlbum()));
-    query.addCriteria(
-        Criteria.where(Song.KEY_SONG_ARTIST_FULL_NAME).is(songToAdd.getSongArtistFullName()));
+    try {
+      DbQueryStatus dbQueryStatus = null;
+      Song addedSong = null;
+      Query findSongQuery = new Query();
+      findSongQuery.addCriteria(Criteria.where(Song.KEY_SONG_NAME).is(songToAdd.getSongName()));
+      findSongQuery.addCriteria(Criteria.where(Song.KEY_SONG_ALBUM).is(songToAdd.getSongAlbum()));
+      findSongQuery.addCriteria(
+          Criteria.where(Song.KEY_SONG_ARTIST_FULL_NAME).is(songToAdd.getSongArtistFullName()));
 
-    if (!db.exists(query, Song.class)) {
-      addedSong = db.insert(songToAdd);
-    } else {
-      addedSong = db.findOne(query, Song.class);
+      if (!db.exists(findSongQuery, Song.class)) {
+        addedSong = db.insert(songToAdd);
+      } else {
+        addedSong = db.findOne(findSongQuery, Song.class);
+      }
+      if (addedSong == null) {
+
+        return new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_GENERIC);
+      }
+      final String uri = "http://localhost:3002/song";
+      // setting up the request body
+      AddSongRequest addSongRequest = new AddSongRequest();
+      addSongRequest.setSongName(addedSong.getSongName());
+      addSongRequest.setId(addedSong.getId());
+
+      // request entity is created with request body and headers
+      HttpEntity<AddSongRequest> requestEntity = new HttpEntity<>(addSongRequest, null);
+
+      RestTemplate addSongRestTemplate = new RestTemplate();
+      ResponseEntity<AddSongResponse> responseEntity =
+          addSongRestTemplate.exchange(uri, HttpMethod.POST, requestEntity, AddSongResponse.class);
+
+      if (responseEntity.getStatusCode() != HttpStatus.OK) {
+        deleteSongById(addedSong.getId());
+        return new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_GENERIC);
+      }
+      dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+      dbQueryStatus.setData(addedSong.getJsonRepresentation());
+      return dbQueryStatus;
+
+    } catch (Exception e) {
+      DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_GENERIC);
+      return dbQueryStatus;
     }
-    if(addedSong == null){
-
-      return new DbQueryStatus("Failed to add song", DbQueryExecResult.QUERY_ERROR_GENERIC);
-    }
-    final String uri = "http://localhost:3002/song";
-    // setting up the request body
-    AddSongRequest addSongRequest = new AddSongRequest();
-    addSongRequest.setSongName(addedSong.getSongName());
-    addSongRequest.setId(addedSong.getId());
-
-    // request entity is created with request body and headers
-    HttpEntity<AddSongRequest> requestEntity = new HttpEntity<>(addSongRequest, null);
-
-    RestTemplate addSongRestTemplate = new RestTemplate();
-    ResponseEntity<AddSongResponse> responseEntity =
-            addSongRestTemplate.exchange(uri, HttpMethod.POST, requestEntity, AddSongResponse.class);
-
-    if (responseEntity.getStatusCode() != HttpStatus.OK) {
-      deleteSongById(addedSong.getId());
-      return new DbQueryStatus("AddSong API in Profile microservice failed", DbQueryExecResult.QUERY_ERROR_GENERIC);
-    }
-    dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
-    dbQueryStatus.setData(addedSong.getJsonRepresentation());
-    return dbQueryStatus;
   }
 
   @Override
   public DbQueryStatus findSongById(String songId) {
-    ObjectId songObjectId = new ObjectId(songId);
-    Song songById = db.findById(songObjectId, Song.class);
-    if (songById == null) {
-      return new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+    try {
+      ObjectId songObjectId = new ObjectId(songId);
+      Song songById = db.findById(songObjectId, Song.class);
+      if (songById == null) {
+        return new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+      }
+      DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+      dbQueryStatus.setData(songById.getJsonRepresentation());
+      return dbQueryStatus;
+
+    } catch (Exception e) {
+      DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_GENERIC);
+      return dbQueryStatus;
     }
-    DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
-    dbQueryStatus.setData(songById.getJsonRepresentation());
-    return dbQueryStatus;
   }
 
   @Override
   public DbQueryStatus getSongTitleById(String songId) {
-    ObjectId songObjectId = new ObjectId(songId);
-    Song songById = db.findById(songObjectId, Song.class);
-    if (songById == null) {
-      return new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+    try {
+      ObjectId songObjectId = new ObjectId(songId);
+      Song songById = db.findById(songObjectId, Song.class);
+      if (songById == null) {
+        return new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+      }
+      DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+      dbQueryStatus.setData(songById.getSongName());
+      return dbQueryStatus;
+
+    } catch (Exception e) {
+      DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_GENERIC);
+      return dbQueryStatus;
     }
-    DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
-    dbQueryStatus.setData(songById.getSongName());
-    return dbQueryStatus;
   }
 
   @Override
   public DbQueryStatus deleteSongById(String songId) {
-    ObjectId songObjectId = new ObjectId(songId);
-    Song songById = db.findById(songObjectId, Song.class);
-    if (songById == null) {
-      return new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
-    }
-    DeleteResult deletedSong = db.remove(songById);
-    if (!deletedSong.wasAcknowledged()) {
+    try {
+      ObjectId songObjectId = new ObjectId(songId);
+      Song songById = db.findById(songObjectId, Song.class);
+      if (songById == null) {
+        return new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
+      }
+      DeleteResult deletedSong = db.remove(songById);
+      if (!deletedSong.wasAcknowledged()) {
+        DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_GENERIC);
+        return dbQueryStatus;
+      }
+
+      final String uri = "http://localhost:3002/deleteAllSongsFromDb/{songId}";
+
+      Map<String, String> params = new HashMap<String, String>();
+      params.put("songId", songId);
+
+      RestTemplate restTemplate = new RestTemplate();
+      restTemplate.put(uri, null, params);
+
+      DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+      return dbQueryStatus;
+    } catch (Exception e) {
       DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_GENERIC);
       return dbQueryStatus;
     }
-
-    final String uri = "http://localhost:3002/deleteAllSongsFromDb/{songId}";
-
-    Map<String, String> params = new HashMap<String, String>();
-    params.put("songId", songId);
-
-    RestTemplate restTemplate = new RestTemplate();
-    restTemplate.put(uri, null, params);
-
-    DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
-    return dbQueryStatus;
   }
 
   @Override
   public DbQueryStatus updateSongFavouritesCount(String songId, boolean shouldDecrement) {
-    ObjectId songObjectId = new ObjectId(songId);
-    Song songById = db.findById(songObjectId, Song.class);
-    if (songById == null) {
-      return new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
-    }
-    Update update = new Update();
-    if (shouldDecrement) {
-      if (songById.getSongAmountFavourites() < 1) {
-        return new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_GENERIC);
+    try {
+      ObjectId songObjectId = new ObjectId(songId);
+      Song songById = db.findById(songObjectId, Song.class);
+      if (songById == null) {
+        return new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_NOT_FOUND);
       }
-      update.set("songAmountFavourites", songById.getSongAmountFavourites() - 1);
-    } else {
-      update.set("songAmountFavourites", songById.getSongAmountFavourites() + 1);
+      Update update = new Update();
+      if (shouldDecrement) {
+        if (songById.getSongAmountFavourites() < 1) {
+          return new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_GENERIC);
+        }
+        update.set("songAmountFavourites", songById.getSongAmountFavourites() - 1);
+      } else {
+        update.set("songAmountFavourites", songById.getSongAmountFavourites() + 1);
+      }
+      Query query = new Query();
+      query.addCriteria(Criteria.where("_id").is(songById.getId()));
+      db.updateFirst(query, update, Song.class);
+      DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
+      return dbQueryStatus;
+    } catch (Exception e) {
+      DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_ERROR_GENERIC);
+      return dbQueryStatus;
     }
-    Query query = new Query();
-    query.addCriteria(Criteria.where("_id").is(songById.getId()));
-    db.updateFirst(query, update, Song.class);
-    DbQueryStatus dbQueryStatus = new DbQueryStatus("", DbQueryExecResult.QUERY_OK);
-    return dbQueryStatus;
   }
 }
