@@ -26,7 +26,8 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/")
 public class SongController {
 
-  @Autowired private final SongDal songDal;
+  @Autowired
+  private final SongDal songDal;
 
   private OkHttpClient client = new OkHttpClient();
 
@@ -34,8 +35,13 @@ public class SongController {
     this.songDal = songDal;
   }
 
+  /**
+   * /getSongById/{songId} route has a single endpoint, GET used to retrieve all information about
+   * the song using the song id
+   */
   @RequestMapping(value = "/getSongById/{songId}", method = RequestMethod.GET)
-  public @ResponseBody Map<String, Object> getSongById(
+  public @ResponseBody
+  Map<String, Object> getSongById(
       @PathVariable("songId") String songId, HttpServletRequest request) {
 
     Map<String, Object> response = new HashMap<String, Object>();
@@ -48,12 +54,14 @@ public class SongController {
 
     return response;
   }
+
   /**
    * /getSongTitleById/{songId} route has a single endpoint, GET used to retrieve a song name using
    * the song id
    */
   @RequestMapping(value = "/getSongTitleById/{songId}", method = RequestMethod.GET)
-  public @ResponseBody Map<String, Object> getSongTitleById(
+  public @ResponseBody
+  Map<String, Object> getSongTitleById(
       @PathVariable("songId") String songId, HttpServletRequest request) {
 
     Map<String, Object> response = new HashMap<String, Object>();
@@ -66,12 +74,14 @@ public class SongController {
 
     return response;
   }
+
   /**
    * /deleteSongById/{songId} route has a single endpoint, Delete used to remove a song given the
    * song id
    */
   @RequestMapping(value = "/deleteSongById/{songId}", method = RequestMethod.DELETE)
-  public @ResponseBody Map<String, Object> deleteSongById(
+  public @ResponseBody
+  Map<String, Object> deleteSongById(
       @PathVariable("songId") String songId, HttpServletRequest request) {
 
     Map<String, Object> response = new HashMap<String, Object>();
@@ -82,12 +92,14 @@ public class SongController {
             response, dbQueryStatus.getdbQueryExecResult(), dbQueryStatus.getData());
     return response;
   }
+
   /**
    * /addSong route has a single endpoint, Post used to add a song given the song name, artist and
    * album
    */
   @RequestMapping(value = "/addSong", method = RequestMethod.POST)
-  public @ResponseBody Map<String, Object> addSong(
+  public @ResponseBody
+  Map<String, Object> addSong(
       @RequestParam Map<String, String> params, HttpServletRequest request) {
 
     Map<String, Object> response = new HashMap<String, Object>();
@@ -109,7 +121,8 @@ public class SongController {
    * favourite count of a song given the song id
    */
   @RequestMapping(value = "/updateSongFavouritesCount/{songId}", method = RequestMethod.PUT)
-  public @ResponseBody Map<String, Object> updateFavouritesCount(
+  public @ResponseBody
+  Map<String, Object> updateFavouritesCount(
       @PathVariable("songId") String songId,
       @RequestParam("shouldDecrement") String shouldDecrement,
       HttpServletRequest request) {

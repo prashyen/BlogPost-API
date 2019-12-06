@@ -49,6 +49,10 @@ public class ProfileController {
     this.playlistDriver = playlistDriver;
   }
 
+  /**
+   * /profile route has a single endpoint, POST used to add a profile to the database with userName,
+   * fullName and password
+   */
   @RequestMapping(value = "/profile", method = RequestMethod.POST)
   public @ResponseBody
   Map<String, Object> addSong(@RequestParam Map<String, String> params,
@@ -64,6 +68,10 @@ public class ProfileController {
     return response;
   }
 
+  /**
+   * /followFriend/{userName}/{friendUserName} route has a single endpoint, PUT used to add a
+   * follows relationship from profiles with userName to friendUserName
+   */
   @RequestMapping(value = "/followFriend/{userName}/{friendUserName}", method = RequestMethod.PUT)
   public @ResponseBody
   Map<String, Object> followFriend(@PathVariable("userName") String userName,
@@ -78,6 +86,10 @@ public class ProfileController {
     return response;
   }
 
+  /**
+   * /getAllFriendFavouriteSongTitles/{userName} route has a single endpoint, GET used to retrieve
+   * all the users the given user follows and all their favorite songs
+   */
   @RequestMapping(value = "/getAllFriendFavouriteSongTitles/{userName}", method = RequestMethod.GET)
   public @ResponseBody
   Map<String, Object> getAllFriendFavouriteSongTitles(@PathVariable("userName") String userName,
@@ -93,6 +105,10 @@ public class ProfileController {
   }
 
 
+  /**
+   * /unfollowFriend/{userName}/{friendUserName} route has a single endpoint, PUT used to remove a
+   * follows relationship from profiles with userName to friendUserName
+   */
   @RequestMapping(value = "/unfollowFriend/{userName}/{friendUserName}", method = RequestMethod.PUT)
   public @ResponseBody
   Map<String, Object> unfollowFriend(@PathVariable("userName") String userName,
@@ -108,6 +124,10 @@ public class ProfileController {
     return response;
   }
 
+  /**
+   * /likeSong/{userName}/{songId} route has a single endpoint, PUT used to add a contains
+   * relationship from username-favorites playlist to the song node with songID
+   */
   @RequestMapping(value = "/likeSong/{userName}/{songId}", method = RequestMethod.PUT)
   public @ResponseBody
   Map<String, Object> likeSong(@PathVariable("userName") String userName,
@@ -122,6 +142,10 @@ public class ProfileController {
     return response;
   }
 
+  /**
+   * /unlikeSong/{userName}/{songId} route has a single endpoint, PUT used to remove a contains
+   * relationship from username-favorites playlist to the song node with songID
+   */
   @RequestMapping(value = "/unlikeSong/{userName}/{songId}", method = RequestMethod.PUT)
   public @ResponseBody
   Map<String, Object> unlikeSong(@PathVariable("userName") String userName,
@@ -136,6 +160,10 @@ public class ProfileController {
     return response;
   }
 
+  /**
+   * /deleteAllSongsFromDb/{songId} route has a single endpoint, PUT used to delete the song node
+   * with the songID
+   */
   @RequestMapping(value = "/deleteAllSongsFromDb/{songId}", method = RequestMethod.PUT)
   public @ResponseBody
   Map<String, Object> deleteAllSongsFromDb(@PathVariable("songId") String songId,
@@ -150,6 +178,10 @@ public class ProfileController {
     return response;
   }
 
+  /**
+   * /song route has a single endpoint, POST used to add a song node to the datbase with properties
+   * songID and songName
+   */
   @RequestMapping(value = "/song", method = RequestMethod.POST)
   @ResponseBody
   public Map<String, Object> addSongNode(@RequestBody AddSongRequest requestBody,
